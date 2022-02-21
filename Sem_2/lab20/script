@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#Vivodim tolko imena tex, kto starshe M
+
+#Vivodim tolko tex, kto iz strani N(0 - all, 1-Ukraina, 2-Moldova, 666-RUSSIA)
+
+awk -F "|" -v age=$1 -f awk_script.awk awk_input.in
