@@ -1,0 +1,89 @@
+#!/bin/bash
+
+path=$1
+array=()
+cnt=0
+
+
+file_suffix () {  #1-filename 2-dots cnt
+	if [ "$2" -gt 0 ]
+	then
+		suff=$(echo "$1" | awk -F. '{print "."$NF}')
+	else
+		suff="NoSuffix"
+	fi
+	echo "$suff"
+}
+
+
+update_array () {
+	flag=0
+	for comp_o in ${array[@]}
+	do
+		if [ "$comp_o" = "$1" ]
+		then
+			flag=1
+			break
+		fi
+	done
+
+	if [ $flag -eq 0 ]
+	then
+		array[cnt]=$1
+		let "cnt+=1"
+	fi
+}
+
+
+travel () {
+	for obj in "$1"/*
+	do
+		if [ -f "$obj" ]
+		then
+			file_name=$(echo "$obj" | awk -F/ '{print $NF}')
+			dots_cnt=$(echo "$file_name" | tr -cd "." | wc -m )
+			suffix=$(file_suffix "$file_name" "$dots_cnt")
+			update_array "$prefix"
+		else
+			travel "$obj"
+		fi
+	done
+}
+
+#----------------------------------------------------------------------
+
+while [ true ]
+do
+	if [ "$path" = "?" ]
+	then
+		path=""
+		echo "Программа принимает единственный аргумент - путь к директории для подсчета уникальных суффиксов"
+		echo "Пример пути: /home/stas/forTest"
+		read -p "Путь к директории: " path
+	fi
+
+        if [ -z "$path" ]
+        then
+                read -p "Путь к директории: " path
+        elif [ -n "$path" ]
+        then
+                if [ -d "$path" ]
+                then
+                        break
+                else
+                        echo "Введен некоректный путь"
+                        path=""
+                fi
+        fi
+done
+
+travel "$path"
+
+echo "Всего найдено $cnt различных суффиксов:"
+local_cnt=1
+
+for o in ${array[@]}
+do
+	echo "$local_cnt. $o"
+	let "local_cnt+=1"
+done
