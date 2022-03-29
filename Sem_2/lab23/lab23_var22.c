@@ -15,7 +15,7 @@ typedef struct _node {
 
 int STANDART_ARRAY_SIZE = 5;
 int vertex_cnt = 0;
-node* genesis_node;
+node* genesis_node = NULL;
 bool* borders;
 
 
@@ -57,7 +57,14 @@ void delete_node(node* v) {
     for (int i = v->current_cnt - 1; i >= 0; --i) {
         delete_node(v->children[i]);
     }
+    
     node* v_parent = v->parent;
+    if (v_parent == NULL) {
+        free(v);
+        genesis_node = NULL;
+        vertex_cnt--;
+        return;
+    }
     int del_index = 0;
     for (int i = 0; i < v_parent->current_cnt; ++i) {
         if (v_parent->children[i]->value == v->value) {
@@ -67,6 +74,7 @@ void delete_node(node* v) {
             break;
         }
     }
+
     for (int i = del_index + 1; i < v_parent->current_cnt; ++i) {
         v_parent->children[i - 1] = v_parent->children[i];
     }
@@ -77,6 +85,7 @@ void delete_node(node* v) {
 node* find_vertex(node* u, int vertex) {
     if (u->value == vertex)
         return u;
+
     node* vertex_address = NULL;
     for (int i = 0; i < u->current_cnt; ++i) {
         vertex_address = find_vertex(u->children[i], vertex);
@@ -101,6 +110,12 @@ int str_to_int(char* s) {
 
 
 void print_tree(node* u, int space_cnt) {
+
+    if (vertex_cnt == 0) {
+        printf("В дереве нет вершин.\n");
+        return;
+    }
+
     printf("%d\n", u->value);
 
     if (sizeof(borders) / sizeof(bool) - 1 < space_cnt)
@@ -141,8 +156,8 @@ void print_info(bool first_print) {
     if (first_print) {
         printf("    Доступные операции:\n");
         printf("0 - Вывести справку\n");
-        printf("1 - Добавить ребро в дерево\n");
-        printf("2 - Удалить ребро из дерева\n");
+        printf("1 - Добавить вершину в дерево\n");
+        printf("2 - Удалить вершину из дерева\n");
         printf("3 - Вывести дерево\n");
         printf("4 - Вывести количество вершин в дереве\n");
     } else {
@@ -156,7 +171,6 @@ void print_info(bool first_print) {
 
 int main() {
     borders = malloc(sizeof(bool) * 30);
-    bool is_genesis = true;
     char str[100];
     print_info(true);
     while (true) {
@@ -180,8 +194,7 @@ int main() {
                 printf("Введены некоректные данные, допустимы только целочесленные неотрицательные значения вершин\n");
                 continue;
             }
-            if (is_genesis) {
-                is_genesis = false;
+            if (genesis_node == NULL) {
                 genesis_node = create_genesis_node(u);
                 create_node(genesis_node, v);
                 vertex_cnt += 2;
@@ -204,6 +217,10 @@ int main() {
             int u;
             scanf("%s", u_str);
             u = str_to_int(u_str);
+            if (genesis_node == NULL) {
+                printf("Введены некоректные данные\n");
+                continue;
+            }
             node* v = find_vertex(genesis_node, u);
             if (v == NULL)
                 printf("Введены некорректные данные\n");
