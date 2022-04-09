@@ -1,5 +1,3 @@
-//Фамилия;инициалы;пол;номер школы;наличие медали;оценка 1;оценка 2;оценка 3;зачет/незачет за соч
-//оценки 1-4 c конца ;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,19 +42,19 @@ void db_searsh(FILE *f, int points) {
         for (int i = strlen(s) - 1; i >= 0; --i) {
             if (s[i] == ';')
                 delimiter_cnt++;
-            if (delimiter_cnt >= 1 && delimiter_cnt < 4) {
+            if (delimiter_cnt >= 0 && delimiter_cnt < 3) {
                 if (s[i] != ';') {
                     db_points += char_to_int(s[i]) * power_10(order);
                     order++;      
                 } else
                     order = 0;
-            } else if (delimiter_cnt >= 4)
+            } else if (delimiter_cnt >= 3)
                 break;
         }
         delimiter_cnt = 0;
-        if (points == db_points) {
+        if (db_points >= points) {
             flag = true;
-            printf("Фамилия: ");
+            printf("Инициалы: ");
             int j;
             for (int i = 0; i < strlen(s); ++i) {
                 if (s[i] == ';') {
@@ -66,17 +64,7 @@ void db_searsh(FILE *f, int points) {
                 else
                     printf("%c", s[i]);
             }
-            
-            printf(" | Инициалы: ");
-            for (; j < 100; ++j) {
-                if (s[j] == ';') {
-                    printf(" | Баллы: %d", points);
-                    break;
-                }
-                else
-                    printf("%c", s[j]);    
-            }
-            printf("\n");
+            printf(" | Баллы: %d | Дельта: %d\n", db_points, db_points - points);
         }
     }
     if (!flag)
@@ -102,12 +90,23 @@ int main(int argc, char **argv) {
 
     FILE *f;
     char name[] = "students.db";
-    if ((f = fopen(name, "r")) == NULL) {
+    if ((f = fopen(name, "rb")) == NULL) {
         printf("Не удалось открыть файл\n");
         return 0;
     }
+    char str[100];
+    printf("База данных:\n");
+    printf("----------------\n");
+    while(fscanf(f, "%s", str) != EOF) {
+        printf("%s\n", str);
+    }
+    printf("----------------\n\n");
+    fclose(f);
+    f = fopen(name, "rb");
 
+    printf("Резельтаты поиска(>=%d):\n", points);
+    printf("################\n");
     db_searsh(f, points);
-
+    printf("################\n");
     fclose(f);
 }
