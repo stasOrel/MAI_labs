@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "student.h"
+
 
 int str_to_int(char* s) {
     int ans = 0;
@@ -17,58 +19,24 @@ int str_to_int(char* s) {
 }
 
 
-int char_to_int(char c) {
-    return c - '0';
-}
-
-
-int power_10(int order) {
-    int res = 1;
-    while (order > 0) {
-        res *= 10;
-        order--;
-    }
-    return res;
-}
+// int char_to_int(char c) {
+//     return c - '0';
+// }
 
 
 void db_searsh(FILE *f, int points) {
-    char s[100];
-    bool  flag = false;
-    while (fscanf(f, "%s", s) != EOF) {
-        int delimiter_cnt = 0;
-        int db_points = 0;
-        int order = 0;
-        for (int i = strlen(s) - 1; i >= 0; --i) {
-            if (s[i] == ';')
-                delimiter_cnt++;
-            if (delimiter_cnt >= 0 && delimiter_cnt < 3) {
-                if (s[i] != ';') {
-                    db_points += char_to_int(s[i]) * power_10(order);
-                    order++;      
-                } else
-                    order = 0;
-            } else if (delimiter_cnt >= 3)
-                break;
-        }
-        delimiter_cnt = 0;
+    bool flag = true;
+    student s;
+    // while (fscanf(f, "%s %d %d %d", s.initials, &s.mark1, &s.mark2, &s.mark3) != EOF) {
+    while (fread(&s, sizeof(s), 1, f) == 1) {
+        int db_points = s.mark1 + s.mark2 + s.mark3;
         if (db_points >= points) {
-            flag = true;
-            printf("Инициалы: ");
-            int j;
-            for (int i = 0; i < strlen(s); ++i) {
-                if (s[i] == ';') {
-                    j = i + 1;
-                    break;
-                }
-                else
-                    printf("%c", s[i]);
-            }
-            printf(" | Баллы: %d | Дельта: %d\n", db_points, db_points - points);
+            flag = false;
+            printf("Инициалы: %s | Баллы: %d | Разница: %d\n", s.initials, db_points, db_points - points);
         }
     }
-    if (!flag)
-        printf("Ничего не найдено\n");
+    if (flag)
+        printf("По заданным параметрам ничего не найдено\n");
 }
 
 
@@ -97,8 +65,13 @@ int main(int argc, char **argv) {
     char str[100];
     printf("База данных:\n");
     printf("----------------\n");
-    while(fscanf(f, "%s", str) != EOF) {
-        printf("%s\n", str);
+    student s;
+    // while(fscanf(f, "%s", s.initials) != EOF) {
+        // fscanf(f, "%d", &s.mark1);
+        // fscanf(f, "%d", &s.mark2);
+        // fscanf(f, "%d", &s.mark3);
+    while (fread(&s, sizeof(s), 1, f) == 1) {
+        printf("%s | %d | %d | %d\n", s.initials, s.mark1, s.mark2, s.mark3);
     }
     printf("----------------\n\n");
     fclose(f);
