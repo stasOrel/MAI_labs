@@ -1,0 +1,33 @@
+#ifndef STACK_H
+#define STACK_H
+
+#include <stdlib.h>
+#include <stdbool.h>
+
+
+typedef int Item;
+
+
+typedef struct stacknode {
+    Item data;
+    struct stacknode *next;
+} StackNode;
+
+
+typedef struct {
+    StackNode *head;
+    int size;
+} Stack;
+
+
+Stack *stack_create();
+StackNode *insert_stack_node(StackNode *parent, Item value);
+void stack_push(Stack *s, Item value);
+void stack_pop(Stack *s);
+Item stack_top(Stack *s);
+bool stack_is_empty(Stack *s);
+void stack_join(Stack *a, Stack *b);
+void print_stack(Stack *s);
+
+#endif
+
